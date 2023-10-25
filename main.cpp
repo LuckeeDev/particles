@@ -20,7 +20,6 @@ int main() {
   std::vector<const ParticleType*> ptr_vector{};
   ptr_vector.push_back(&pt);
   ptr_vector.push_back(&rt);
-  auto ptr_vector_size = ptr_vector.size();
 
   for (auto const& p : ptr_vector) {
     p->print();

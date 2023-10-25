@@ -38,7 +38,7 @@ class Particle {
 
   // static methods
 
-  static int getParticleTypesCount();
+  static int countParticleTypes();
   static void addParticleType(std::string const&, double, int, double);
   static void printParticleTypes();
 

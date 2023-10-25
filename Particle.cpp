@@ -78,7 +78,10 @@ void Particle::setMomentum(Momentum const& momentum) { m_momentum = momentum; }
 
 // static methods
 
-int Particle::getParticleTypesCount() { return m_particle_types.size(); }
+int Particle::countParticleTypes() {
+  return std::count_if(m_particle_types.begin(), m_particle_types.end(),
+                       [](ParticleType* const& pt) { return pt != nullptr; });
+}
 
 void Particle::addParticleType(std::string const& name, double mass, int charge,
                                double width = 0) {
