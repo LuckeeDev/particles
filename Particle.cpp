@@ -8,6 +8,10 @@
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
 
+// init static members
+
+std::array<ParticleType*, 10> Particle::m_particle_types{};
+
 // momentum operators
 
 Momentum Momentum::operator+(Momentum const& momentum) const {
@@ -108,7 +112,7 @@ void Particle::printParticleTypes() {
 int Particle::mFindParticleIndex(std::string const& name) {
   auto it =
       std::find_if(m_particle_types.begin(), m_particle_types.end(),
-                [&name](ParticleType* pt) { return pt->getName() == name; });
+                   [&name](ParticleType* pt) { return pt->getName() == name; });
 
   if (it == m_particle_types.end()) {
     std::cout << "Invalid particle name!" << '\n';

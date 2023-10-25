@@ -13,4 +13,4 @@ string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=address,undefined -fno-omit-frame-pointer")
 string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG " -fsanitize=address,undefined -fno-omit-frame-pointer")
 
-add_executable(particles main.cpp Particle.cpp ParticleType.cpp ResonanceType.cpp)
+add_executable(particles main.cpp ParticleType.cpp ResonanceType.cpp Particle.cpp)
