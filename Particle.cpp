@@ -107,7 +107,7 @@ void Particle::printParticleTypes() {
 
 int Particle::mFindParticleIndex(std::string const& name) {
   auto it =
-      std::find(m_particle_types.begin(), m_particle_types.end(),
+      std::find_if(m_particle_types.begin(), m_particle_types.end(),
                 [&name](ParticleType* pt) { return pt->getName() == name; });
 
   if (it == m_particle_types.end()) {
