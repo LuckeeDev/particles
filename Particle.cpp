@@ -3,13 +3,14 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <memory>
 
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
 
 // init static members
 
-std::array<ParticleType*, 10> Particle::m_particle_types{};
+std::array<std::unique_ptr<ParticleType>, 10> Particle::m_particle_types{};
 
 // momentum operators
 
@@ -83,8 +84,9 @@ void Particle::setMomentum(Momentum const& momentum) { m_momentum = momentum; }
 // static methods
 
 int Particle::countParticleTypes() {
-  return std::count_if(m_particle_types.begin(), m_particle_types.end(),
-                       [](ParticleType* const& pt) { return pt != nullptr; });
+  return std::count_if(
+      m_particle_types.begin(), m_particle_types.end(),
+      [](std::unique_ptr<ParticleType> const& pt) { return pt != nullptr; });
 }
 
 void Particle::addParticleType(std::string const& name, double mass, int charge,
@@ -96,9 +98,11 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
         std::find(m_particle_types.begin(), m_particle_types.end(), nullptr);
 
     if (width == 0) {
-      *first_empty = new ParticleType{name, mass, charge};
+      *first_empty =
+          std::unique_ptr<ParticleType>(new ParticleType{name, mass, charge});
     } else {
-      *first_empty = new ResonanceType{name, mass, charge, width};
+      *first_empty = std::unique_ptr<ParticleType>(
+          new ResonanceType{name, mass, charge, width});
     }
   } else {
     std::cout << "The \"" << name << "\" particle type already exists!" << '\n';
@@ -118,7 +122,7 @@ void Particle::printParticleTypes() {
 
 int Particle::mFindParticleIndex(std::string const& name) {
   auto it = std::find_if(m_particle_types.begin(), m_particle_types.end(),
-                         [&name](ParticleType* const& pt) {
+                         [&name](std::unique_ptr<ParticleType> const& pt) {
                            if (pt) {
                              return pt->getName() == name;
                            }
