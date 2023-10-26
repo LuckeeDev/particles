@@ -6,6 +6,7 @@
 class ParticleType {
  public:
   ParticleType(std::string const&, double, int);
+  virtual ~ParticleType() = default;
 
   std::string getName() const;
   double getMass() const;
