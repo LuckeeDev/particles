@@ -48,5 +48,8 @@ int main() {
   n.setIndex("neutron");
   n.printData();
 
+  std::cout << "\n\n"
+            << "PRINTING PARTICLE TYPES" << '\n';
+
   Particle::printParticleTypes();
 }

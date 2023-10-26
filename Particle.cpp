@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <numeric>
 
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
@@ -24,19 +23,24 @@ double Momentum::operator*(Momentum const& momentum) const {
 
 // constructor
 
-Particle::Particle(std::string const& name,
-                   Momentum const& momentum = {0, 0, 0})
+Particle::Particle(std::string const& name, Momentum const& momentum)
     : m_momentum{momentum} {
   m_index = mFindParticleIndex(name);
+
+  if (m_index == -1) {
+    std::cout << "The \"" << name << "\" particle type does not exist!" << '\n';
+  }
 }
 
 // public methods
 
 void Particle::printData() const {
-  std::cout << "Index :" << m_index << '\n'
-            << "Name: " << m_particle_types[m_index]->getName() << '\n'
-            << "Momentum: (" << m_momentum.x << ", " << m_momentum.y << ", "
-            << m_momentum.z << ")\n";
+  if (m_index != -1) {
+    std::cout << "Index: " << m_index << '\n'
+              << "Name: " << m_particle_types[m_index]->getName() << '\n'
+              << "Momentum: (" << m_momentum.x << ", " << m_momentum.y << ", "
+              << m_momentum.z << ")\n";
+  }
 }
 
 // getters
@@ -84,41 +88,45 @@ int Particle::countParticleTypes() {
 }
 
 void Particle::addParticleType(std::string const& name, double mass, int charge,
-                               double width = 0) {
+                               double width) {
   auto existing_index = mFindParticleIndex(name);
 
-  if (existing_index != -1) {
+  if (existing_index == -1) {
     auto first_empty =
         std::find(m_particle_types.begin(), m_particle_types.end(), nullptr);
 
-    ParticleType* new_particle;
-
     if (width == 0) {
-      new_particle = new ParticleType{name, mass, charge};
+      *first_empty = new ParticleType{name, mass, charge};
     } else {
-      new_particle = new ResonanceType{name, mass, charge, width};
+      *first_empty = new ResonanceType{name, mass, charge, width};
     }
-
-    *first_empty = new_particle;
+  } else {
+    std::cout << "The \"" << name << "\" particle type already exists!" << '\n';
   }
 }
 
 void Particle::printParticleTypes() {
   for (auto const& p : m_particle_types) {
-    p->print();
-    std::cout << '\n';
+    if (p) {
+      p->print();
+      std::cout << '\n';
+    }
   }
 }
 
 // private methods
 
 int Particle::mFindParticleIndex(std::string const& name) {
-  auto it =
-      std::find_if(m_particle_types.begin(), m_particle_types.end(),
-                   [&name](ParticleType* pt) { return pt->getName() == name; });
+  auto it = std::find_if(m_particle_types.begin(), m_particle_types.end(),
+                         [&name](ParticleType* const& pt) {
+                           if (pt) {
+                             return pt->getName() == name;
+                           }
+
+                           return false;
+                         });
 
   if (it == m_particle_types.end()) {
-    std::cout << "Invalid particle name!" << '\n';
     return -1;
   }
 

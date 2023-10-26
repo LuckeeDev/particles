@@ -17,7 +17,7 @@ struct Momentum {
 
 class Particle {
  public:
-  Particle(std::string const&, Momentum const&);
+  Particle(std::string const&, Momentum const& = {0., 0., 0.});
 
   void printData() const;
 
@@ -39,7 +39,7 @@ class Particle {
   // static methods
 
   static int countParticleTypes();
-  static void addParticleType(std::string const&, double, int, double);
+  static void addParticleType(std::string const&, double, int, double = 0.);
   static void printParticleTypes();
 
  private:
