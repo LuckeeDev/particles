@@ -9,7 +9,7 @@
 
 // init static members
 
-std::array<ParticleType*, 10> Particle::m_particle_types{};
+std::vector<ParticleType> Particle::m_particle_types{};
 
 // momentum operators
 
@@ -27,7 +27,7 @@ Particle::Particle(std::string const& name, Momentum const& momentum)
     : m_momentum{momentum} {
   m_index = mFindParticleIndex(name);
 
-  if (m_index == -1) {
+  if (m_index == std::nullopt) {
     std::cout << "The \"" << name << "\" particle type does not exist!" << '\n';
   }
 }
@@ -35,9 +35,9 @@ Particle::Particle(std::string const& name, Momentum const& momentum)
 // public methods
 
 void Particle::printData() const {
-  if (m_index != -1) {
-    std::cout << "Index: " << m_index << '\n'
-              << "Name: " << m_particle_types[m_index]->getName() << '\n'
+  if (m_index != std::nullopt) {
+    std::cout << "Index: " << m_index.value() << '\n'
+              << "Name: " << m_particle_types[m_index.value()].getName() << '\n'
               << "Momentum: (" << m_momentum.x << ", " << m_momentum.y << ", "
               << m_momentum.z << ")\n";
   }
@@ -45,17 +45,31 @@ void Particle::printData() const {
 
 // getters
 
-int Particle::getIndex() const { return m_index; }
+std::optional<int> Particle::getIndex() const { return m_index; }
 
 Momentum Particle::getMomentum() const { return m_momentum; }
 
 double Particle::getEnergy() const {
-  return std::sqrt(std::pow(m_particle_types[m_index]->getMass(), 2) +
-                   m_momentum * m_momentum);
+  if (m_index != std::nullopt) {
+    return std::sqrt(std::pow(m_particle_types[m_index.value()].getMass(), 2) +
+                     m_momentum * m_momentum);
+  } else {
+    std::cout << "This particle has no energy because its index is invalid!"
+              << '\n';
+
+    return 0;
+  }
 }
 
 double Particle::getMass() const {
-  return m_particle_types[m_index]->getMass();
+  if (m_index) {
+    return m_particle_types[m_index.value()].getMass();
+  } else {
+    std::cout << "This particle has no mass because its index is invalid!"
+              << '\n';
+
+    return 0;
+  }
 }
 
 double Particle::getInvariantMass(Particle const& p) const {
@@ -71,7 +85,12 @@ void Particle::setIndex(std::string const& name) {
 }
 
 void Particle::setIndex(int index) {
-  m_index = m_particle_types[index] == nullptr ? -1 : index;
+  if (index >= 0 && index < static_cast<int>(m_particle_types.size())) {
+    m_index = index;
+  } else {
+    std::cout << "The index \"" << index
+              << "\" does not refer to a particle type!" << '\n';
+  }
 }
 
 void Particle::setMomentum(double px, double py, double pz) {
@@ -82,23 +101,17 @@ void Particle::setMomentum(Momentum const& momentum) { m_momentum = momentum; }
 
 // static methods
 
-int Particle::countParticleTypes() {
-  return std::count_if(m_particle_types.begin(), m_particle_types.end(),
-                       [](ParticleType* const& pt) { return pt != nullptr; });
-}
+int Particle::countParticleTypes() { return m_particle_types.size(); }
 
 void Particle::addParticleType(std::string const& name, double mass, int charge,
                                double width) {
   auto existing_index = mFindParticleIndex(name);
 
-  if (existing_index == -1) {
-    auto first_empty =
-        std::find(m_particle_types.begin(), m_particle_types.end(), nullptr);
-
+  if (existing_index == std::nullopt) {
     if (width == 0) {
-      *first_empty = new ParticleType{name, mass, charge};
+      m_particle_types.push_back(ParticleType{name, mass, charge});
     } else {
-      *first_empty = new ResonanceType{name, mass, charge, width};
+      m_particle_types.push_back(ResonanceType{name, mass, charge, width});
     }
   } else {
     std::cout << "The \"" << name << "\" particle type already exists!" << '\n';
@@ -107,27 +120,23 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
 
 void Particle::printParticleTypes() {
   for (auto const& p : m_particle_types) {
-    if (p) {
-      p->print();
-      std::cout << '\n';
-    }
+    p.print();
+    std::cout << '\n';
   }
 }
 
 // private methods
 
-int Particle::mFindParticleIndex(std::string const& name) {
-  auto it = std::find_if(m_particle_types.begin(), m_particle_types.end(),
-                         [&name](ParticleType* const& pt) {
-                           if (pt) {
-                             return pt->getName() == name;
-                           }
+std::optional<int> Particle::mFindParticleIndex(std::string const& name) {
+  auto v_begin = m_particle_types.begin();
+  auto v_end = m_particle_types.end();
 
-                           return false;
-                         });
+  auto it = std::find_if(v_begin, v_end, [&name](ParticleType const& pt) {
+    return pt.getName() == name;
+  });
 
-  if (it == m_particle_types.end()) {
-    return -1;
+  if (it == v_end) {
+    return std::nullopt;
   }
 
   return std::distance(m_particle_types.begin(), it);

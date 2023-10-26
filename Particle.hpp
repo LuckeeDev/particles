@@ -1,8 +1,9 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
-#include <array>
+#include <optional>
 #include <string>
+#include <vector>
 
 class ParticleType;
 
@@ -30,7 +31,7 @@ class Particle {
 
   // getters
 
-  int getIndex() const;
+  std::optional<int> getIndex() const;
   Momentum getMomentum() const;
   double getEnergy() const;
   double getMass() const;
@@ -44,10 +45,10 @@ class Particle {
 
  private:
   Momentum m_momentum;
-  int m_index;
+  std::optional<int> m_index;
 
-  static std::array<ParticleType*, 10> m_particle_types;
-  static int mFindParticleIndex(std::string const& name);
+  static std::vector<ParticleType> m_particle_types;
+  static std::optional<int> mFindParticleIndex(std::string const& name);
 };
 
 #endif
