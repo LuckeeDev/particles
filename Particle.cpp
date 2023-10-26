@@ -25,11 +25,7 @@ double Momentum::operator*(Momentum const& momentum) const {
 
 Particle::Particle(std::string const& name, Momentum const& momentum)
     : m_momentum{momentum} {
-  m_index = mFindParticleIndex(name);
-
-  if (m_index == std::nullopt) {
-    std::cout << "The \"" << name << "\" particle type does not exist!" << '\n';
-  }
+  setIndex(name);
 }
 
 // public methods
@@ -82,6 +78,10 @@ double Particle::getInvariantMass(Particle const& p) const {
 
 void Particle::setIndex(std::string const& name) {
   m_index = mFindParticleIndex(name);
+
+  if (m_index == std::nullopt) {
+    std::cout << "The \"" << name << "\" particle type does not exist!" << '\n';
+  }
 }
 
 void Particle::setIndex(int index) {
