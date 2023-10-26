@@ -12,7 +12,7 @@ class ResonanceType : public ParticleType {
   void print() const override;
 
  private:
-  double const m_width;
+  double m_width;
 };
 
 #endif

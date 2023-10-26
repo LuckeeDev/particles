@@ -2,7 +2,7 @@
 #define PARTICLE_HPP
 
 #include <array>
-#include <memory>
+#include <optional>
 #include <string>
 
 class ParticleType;
@@ -47,7 +47,7 @@ class Particle {
   Momentum m_momentum;
   int m_index;
 
-  static std::array<std::unique_ptr<ParticleType>, 10> m_particle_types;
+  static std::array<std::optional<ParticleType>, 10> m_particle_types;
   static int mFindParticleIndex(std::string const& name);
 };
 
