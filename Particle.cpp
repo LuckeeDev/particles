@@ -51,19 +51,21 @@ double Particle::getEnergy() const {
     return std::sqrt(std::pow(m_particle_types[m_index.value()]->getMass(), 2) +
                      m_momentum * m_momentum);
   } else {
-    std::cout << "This particle has no energy because its index is invalid!"
-              << '\n';
+    std::cout
+        << "ERROR: This particle has no energy because its index is invalid!"
+        << '\n';
 
     return 0;
   }
 }
 
 double Particle::getMass() const {
-  if (m_index) {
+  if (m_index != std::nullopt) {
     return m_particle_types[m_index.value()]->getMass();
   } else {
-    std::cout << "This particle has no mass because its index is invalid!"
-              << '\n';
+    std::cout
+        << "ERROR: This particle has no mass because its index is invalid!"
+        << '\n';
 
     return 0;
   }
@@ -71,6 +73,7 @@ double Particle::getMass() const {
 
 double Particle::getInvariantMass(Particle const& p) const {
   auto newMomentum = m_momentum + p.getMomentum();
+
   return std::sqrt(std::pow(getEnergy() + p.getEnergy(), 2) -
                    newMomentum * newMomentum);
 }
@@ -81,7 +84,8 @@ void Particle::setIndex(std::string const& name) {
   m_index = mFindParticleIndex(name);
 
   if (m_index == std::nullopt) {
-    std::cout << "The \"" << name << "\" particle type does not exist!" << '\n';
+    std::cout << "ERROR: The \"" << name << "\" particle type does not exist!"
+              << '\n';
   }
 }
 
@@ -89,7 +93,7 @@ void Particle::setIndex(int index) {
   if (index >= 0 && index < static_cast<int>(m_particle_types.size())) {
     m_index = index;
   } else {
-    std::cout << "The index \"" << index
+    std::cout << "ERROR: The index \"" << index
               << "\" does not refer to a particle type!" << '\n';
   }
 }
@@ -117,14 +121,20 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
           new ResonanceType{name, mass, charge, width}});
     }
   } else {
-    std::cout << "The \"" << name << "\" particle type already exists!" << '\n';
+    std::cout << "ERROR: The \"" << name << "\" particle type already exists!"
+              << '\n';
   }
 }
 
 void Particle::printParticleTypes() {
-  for (auto const& p : m_particle_types) {
-    p->print();
-    std::cout << '\n';
+  auto v_end = m_particle_types.end();
+
+  for (auto it{m_particle_types.begin()}; it < v_end; ++it) {
+    (*it)->print();
+
+    if (it != v_end - 1) {
+      std::cout << '\n';
+    }
   }
 }
 
