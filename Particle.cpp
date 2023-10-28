@@ -9,7 +9,7 @@
 
 // init static members
 
-std::vector<ParticleType> Particle::m_particle_types{};
+std::vector<std::unique_ptr<ParticleType>> Particle::m_particle_types{};
 
 // momentum operators
 
@@ -33,7 +33,8 @@ Particle::Particle(std::string const& name, Momentum const& momentum)
 void Particle::printData() const {
   if (m_index != std::nullopt) {
     std::cout << "Index: " << m_index.value() << '\n'
-              << "Name: " << m_particle_types[m_index.value()].getName() << '\n'
+              << "Name: " << m_particle_types[m_index.value()]->getName()
+              << '\n'
               << "Momentum: (" << m_momentum.x << ", " << m_momentum.y << ", "
               << m_momentum.z << ")\n";
   }
@@ -47,7 +48,7 @@ Momentum Particle::getMomentum() const { return m_momentum; }
 
 double Particle::getEnergy() const {
   if (m_index != std::nullopt) {
-    return std::sqrt(std::pow(m_particle_types[m_index.value()].getMass(), 2) +
+    return std::sqrt(std::pow(m_particle_types[m_index.value()]->getMass(), 2) +
                      m_momentum * m_momentum);
   } else {
     std::cout << "This particle has no energy because its index is invalid!"
@@ -59,7 +60,7 @@ double Particle::getEnergy() const {
 
 double Particle::getMass() const {
   if (m_index) {
-    return m_particle_types[m_index.value()].getMass();
+    return m_particle_types[m_index.value()]->getMass();
   } else {
     std::cout << "This particle has no mass because its index is invalid!"
               << '\n';
@@ -109,9 +110,11 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
 
   if (existing_index == std::nullopt) {
     if (width == 0) {
-      m_particle_types.push_back(ParticleType{name, mass, charge});
+      m_particle_types.push_back(
+          std::unique_ptr<ParticleType>{new ParticleType{name, mass, charge}});
     } else {
-      m_particle_types.push_back(ResonanceType{name, mass, charge, width});
+      m_particle_types.push_back(std::unique_ptr<ParticleType>{
+          new ResonanceType{name, mass, charge, width}});
     }
   } else {
     std::cout << "The \"" << name << "\" particle type already exists!" << '\n';
@@ -120,7 +123,7 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
 
 void Particle::printParticleTypes() {
   for (auto const& p : m_particle_types) {
-    p.print();
+    p->print();
     std::cout << '\n';
   }
 }
@@ -131,9 +134,10 @@ std::optional<int> Particle::mFindParticleIndex(std::string const& name) {
   auto v_begin = m_particle_types.begin();
   auto v_end = m_particle_types.end();
 
-  auto it = std::find_if(v_begin, v_end, [&name](ParticleType const& pt) {
-    return pt.getName() == name;
-  });
+  auto it = std::find_if(v_begin, v_end,
+                         [&name](std::unique_ptr<ParticleType> const& pt) {
+                           return pt->getName() == name;
+                         });
 
   if (it == v_end) {
     return std::nullopt;

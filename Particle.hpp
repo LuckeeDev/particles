@@ -1,6 +1,7 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -47,7 +48,7 @@ class Particle {
   Momentum m_momentum;
   std::optional<int> m_index;
 
-  static std::vector<ParticleType> m_particle_types;
+  static std::vector<std::unique_ptr<ParticleType>> m_particle_types;
   static std::optional<int> mFindParticleIndex(std::string const& name);
 };
 
