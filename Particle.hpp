@@ -1,25 +1,38 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
-#include <array>
+#include <memory>
+#include <optional>
 #include <string>
+#include <vector>
 
 class ParticleType;
 
+struct PolarVector {
+  double r;
+  double theta;
+  double phi;
+};
 struct Momentum {
   double x;
   double y;
   double z;
 
+  Momentum(double, double, double);
+  Momentum(PolarVector const&);
+
+  PolarVector getPolar() const;
   Momentum operator+(Momentum const&) const;
   double operator*(Momentum const&) const;
 };
 
 class Particle {
  public:
-  Particle(std::string const&, Momentum const& = {0., 0., 0.});
+  Particle(std::string const& = "", Momentum const& = {0., 0., 0.});
 
   void printData() const;
+
+  int decayToBody(Particle& dau1, Particle& dau2) const;
 
   // setters
 
@@ -30,10 +43,12 @@ class Particle {
 
   // getters
 
-  int getIndex() const;
+  std::optional<int> getIndex() const;
   Momentum getMomentum() const;
   double getEnergy() const;
   double getMass() const;
+  double getCharge() const;
+  std::string getName() const;
   double getInvariantMass(Particle const&) const;
 
   // static methods
@@ -44,10 +59,12 @@ class Particle {
 
  private:
   Momentum m_momentum;
-  int m_index;
+  std::optional<int> m_index;
 
-  static std::array<ParticleType*, 10> m_particle_types;
-  static int mFindParticleIndex(std::string const& name);
+  void boost(double bx, double by, double bz);
+
+  static std::vector<std::unique_ptr<ParticleType>> m_particle_types;
+  static std::optional<int> mFindParticleIndex(std::string const& name);
 };
 
 #endif
