@@ -8,7 +8,7 @@ class ResonanceType : public ParticleType {
   ResonanceType(std::string const&, double, int, double);
   ~ResonanceType() override = default;
 
-  double getWidth() const;
+  double getWidth() const override;
   void print() const override;
 
  private:

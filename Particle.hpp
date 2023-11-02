@@ -8,20 +8,31 @@
 
 class ParticleType;
 
+struct PolarVector {
+  double r;
+  double theta;
+  double phi;
+};
 struct Momentum {
   double x;
   double y;
   double z;
 
+  Momentum(double, double, double);
+  Momentum(PolarVector const&);
+
+  PolarVector getPolar() const;
   Momentum operator+(Momentum const&) const;
   double operator*(Momentum const&) const;
 };
 
 class Particle {
  public:
-  Particle(std::string const&, Momentum const& = {0., 0., 0.});
+  Particle(std::string const& = "", Momentum const& = {0., 0., 0.});
 
   void printData() const;
+
+  int decayToBody(Particle& dau1, Particle& dau2) const;
 
   // setters
 
@@ -36,6 +47,8 @@ class Particle {
   Momentum getMomentum() const;
   double getEnergy() const;
   double getMass() const;
+  double getCharge() const;
+  std::string getName() const;
   double getInvariantMass(Particle const&) const;
 
   // static methods
@@ -47,6 +60,8 @@ class Particle {
  private:
   Momentum m_momentum;
   std::optional<int> m_index;
+
+  void boost(double bx, double by, double bz);
 
   static std::vector<std::unique_ptr<ParticleType>> m_particle_types;
   static std::optional<int> mFindParticleIndex(std::string const& name);
