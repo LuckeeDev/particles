@@ -1,2 +1,0 @@
-compile:
-	g++ -Wall -Wextra main.cpp Particle.cpp ResonanceType.cpp ParticleType.cpp  -o main.out `root-config --cflags --libs`

@@ -1,4 +1,13 @@
-build
+# IDE directories
 .vscode
+
+# Built files
 *.out
+
+# ROOT files
 *.root
+
+# ROOT build artifacts
+*.d
+*.so
+*.pcm

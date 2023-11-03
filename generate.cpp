@@ -5,14 +5,19 @@
 #include "Particle.hpp"
 #include "ParticleType.hpp"
 #include "ResonanceType.hpp"
-#include "TApplication.h"
 #include "TBenchmark.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TMath.h"
 #include "TRandom.h"
 
-int main(int argc, char** argv) {
+void generate(int n_gen) {
+  gBenchmark->Start("Benchmark");
+
+  R__LOAD_LIBRARY(ParticleType_cpp.so)
+  R__LOAD_LIBRARY(ResonanceType_cpp.so)
+  R__LOAD_LIBRARY(Particle_cpp.so)
+
   Particle::addParticleType("pion+", 0.13957, 1);
   Particle::addParticleType("pion-", 0.13957, -1);
   Particle::addParticleType("kaon+", 0.49367, 1);
@@ -83,7 +88,7 @@ int main(int argc, char** argv) {
   invm_decayed_h->Sumw2();
   histo_array[11] = invm_decayed_h;
 
-  for (int i{}; i < 1e5; ++i) {
+  for (int i{}; i < n_gen; ++i) {
     std::vector<Particle> event_particles(100);
 
     event_particles.reserve(150);
@@ -276,4 +281,6 @@ int main(int argc, char** argv) {
   }
 
   file->Close();
+
+  gBenchmark->Show("Benchmark");
 }
