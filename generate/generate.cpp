@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "Particle.hpp"
@@ -11,7 +12,7 @@
 #include "TMath.h"
 #include "TRandom.h"
 
-void generate(int n_gen) {
+void generate(int n_gen, const char* file_name) {
   gBenchmark->Start("Benchmark");
 
   R__LOAD_LIBRARY(ParticleType_cpp.so)
@@ -44,47 +45,47 @@ void generate(int n_gen) {
   histo_array[2] = polar_angles_histogram;
 
   TH1F* momentum_histogram =
-      new TH1F("momentum_histogram", "Momentum", 1e4, 0, 10);
+      new TH1F("momentum_histogram", "Momentum", 1e3, 0, 9);
   histo_array[3] = momentum_histogram;
 
   TH1F* momentum_xy_istogram =
-      new TH1F("momentum_xy_histogram", "Momentum xy", 1e4, 0, 10);
+      new TH1F("momentum_xy_histogram", "Momentum xy", 1e3, 0, 9);
   histo_array[4] = momentum_xy_istogram;
 
-  TH1F* energy_histogram = new TH1F("energy_histogram", "Energy", 1e5, 0, 4);
+  TH1F* energy_histogram = new TH1F("energy_histogram", "Energy", 1e4, 0, 4);
   histo_array[5] = energy_histogram;
 
   // invariant mass histograms
   TH1F* invm_all_h =
-      new TH1F("invm_all_h", "Invariant mass, all particles", 1e5, 0, 4);
+      new TH1F("invm_all_h", "Invariant mass, all particles", 1e4, 0, 7);
   invm_all_h->Sumw2();
   histo_array[6] = invm_all_h;
 
   TH1F* invm_opposite_charge_h = new TH1F(
-      "invm_opposite_charge_h", "Invariant mass, opposite charge", 1e5, 0, 4);
+      "invm_opposite_charge_h", "Invariant mass, opposite charge", 1e4, 0, 7);
   invm_opposite_charge_h->Sumw2();
   histo_array[7] = invm_opposite_charge_h;
 
   TH1F* invm_same_charge_h =
-      new TH1F("invm_same_charge_h", "Invariant mass, same charge", 1e5, 0, 4);
+      new TH1F("invm_same_charge_h", "Invariant mass, same charge", 1e4, 0, 7);
   invm_same_charge_h->Sumw2();
   histo_array[8] = invm_same_charge_h;
 
   TH1F* invm_pion_kaon_opposite_h =
       new TH1F("invm_pion_kaon_opposite_h",
-               "Invariant mass, pion+ and kaon- or pion- and kaon+", 1e5, 0, 4);
+               "Invariant mass, pion+ and kaon- or pion- and kaon+", 1e4, 0, 7);
   invm_pion_kaon_opposite_h->Sumw2();
   histo_array[9] = invm_pion_kaon_opposite_h;
 
   TH1F* invm_pion_kaon_same_h =
       new TH1F("invm_pion_kaon_same_h",
-               "Invariant mass, pion+ and kaon+ or pion- and kaon-", 1e5, 0, 4);
+               "Invariant mass, pion+ and kaon+ or pion- and kaon-", 1e4, 0, 7);
   invm_pion_kaon_same_h->Sumw2();
   histo_array[10] = invm_pion_kaon_same_h;
 
   TH1F* invm_decayed_h =
       new TH1F("invm_decayed_h", "Invariant mass, decayed particles from K*",
-               1e5, 0.6, 1.2);
+               1e3, 0.6, 1.2);
   invm_decayed_h->Sumw2();
   histo_array[11] = invm_decayed_h;
 
@@ -274,7 +275,7 @@ void generate(int n_gen) {
     }
   }
 
-  TFile* file = new TFile("file.root", "RECREATE");
+  TFile* file = new TFile(file_name, "RECREATE");
 
   for (auto const& p : histo_array) {
     p->Write();
