@@ -103,7 +103,8 @@ void generate(int n_gen, const char* file_name) {
       // convert polar to cartesian coordinates
       event_particles[j].setMomentum(Momentum{PolarVector{rho, theta, phi}});
 
-      auto x = gRandom->Rndm();
+      auto x = gRandom->Uniform(0, 1);
+
       if (x <= 0.4) {
         event_particles[j].setIndex("pion+");
       } else if (x <= 0.8) {
