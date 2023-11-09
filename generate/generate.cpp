@@ -9,6 +9,7 @@
 #include "TBenchmark.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TList.h"
 #include "TMath.h"
 #include "TRandom.h"
 
@@ -29,65 +30,65 @@ void generate(int n_gen, const char* file_name) {
 
   gRandom->SetSeed();
 
-  std::array<TH1*, 12> histo_array;
+  TList* histo_list = new TList();
 
   // particle histograms
   TH1I* particle_types_histogram =
       new TH1I("particle_types_histogram", "Particle types", 7, 0, 7);
-  histo_array[0] = particle_types_histogram;
+  histo_list->Add(particle_types_histogram);  // 0
 
   TH1F* azimutal_angles_histogram = new TH1F(
       "azimutal_angles_histogram", "Azimutal angles", 1e3, 0, TMath::Pi());
-  histo_array[1] = azimutal_angles_histogram;
+  histo_list->Add(azimutal_angles_histogram);  // 1
 
   TH1F* polar_angles_histogram = new TH1F(
       "polar_angles_histogram", "Polar angles", 1e3, 0, TMath::Pi() * 2.);
-  histo_array[2] = polar_angles_histogram;
+  histo_list->Add(polar_angles_histogram);  // 2
 
   TH1F* momentum_histogram =
       new TH1F("momentum_histogram", "Momentum", 1e3, 0, 9);
-  histo_array[3] = momentum_histogram;
+  histo_list->Add(momentum_histogram);  // 3
 
   TH1F* momentum_xy_istogram =
       new TH1F("momentum_xy_histogram", "Momentum xy", 1e3, 0, 9);
-  histo_array[4] = momentum_xy_istogram;
+  histo_list->Add(momentum_xy_istogram);  // 4
 
   TH1F* energy_histogram = new TH1F("energy_histogram", "Energy", 1e4, 0, 4);
-  histo_array[5] = energy_histogram;
+  histo_list->Add(energy_histogram);  // 5
 
   // invariant mass histograms
   TH1F* invm_all_h =
       new TH1F("invm_all_h", "Invariant mass, all particles", 1e4, 0, 7);
   invm_all_h->Sumw2();
-  histo_array[6] = invm_all_h;
+  histo_list->Add(invm_all_h);  // 6
 
   TH1F* invm_opposite_charge_h = new TH1F(
       "invm_opposite_charge_h", "Invariant mass, opposite charge", 1e4, 0, 7);
   invm_opposite_charge_h->Sumw2();
-  histo_array[7] = invm_opposite_charge_h;
+  histo_list->Add(invm_opposite_charge_h);  // 7
 
   TH1F* invm_same_charge_h =
       new TH1F("invm_same_charge_h", "Invariant mass, same charge", 1e4, 0, 7);
   invm_same_charge_h->Sumw2();
-  histo_array[8] = invm_same_charge_h;
+  histo_list->Add(invm_same_charge_h);  // 8
 
   TH1F* invm_pion_kaon_opposite_h =
       new TH1F("invm_pion_kaon_opposite_h",
                "Invariant mass, pion+ and kaon- or pion- and kaon+", 1e4, 0, 7);
   invm_pion_kaon_opposite_h->Sumw2();
-  histo_array[9] = invm_pion_kaon_opposite_h;
+  histo_list->Add(invm_pion_kaon_opposite_h);  // 9
 
   TH1F* invm_pion_kaon_same_h =
       new TH1F("invm_pion_kaon_same_h",
                "Invariant mass, pion+ and kaon+ or pion- and kaon-", 1e4, 0, 7);
   invm_pion_kaon_same_h->Sumw2();
-  histo_array[10] = invm_pion_kaon_same_h;
+  histo_list->Add(invm_pion_kaon_same_h);  // 10
 
   TH1F* invm_decayed_h =
       new TH1F("invm_decayed_h", "Invariant mass, decayed particles from K*",
                1e3, 0.6, 1.2);
   invm_decayed_h->Sumw2();
-  histo_array[11] = invm_decayed_h;
+  histo_list->Add(invm_decayed_h);  // 11
 
   for (int i{}; i < n_gen; ++i) {
     std::vector<Particle> event_particles(100);
@@ -277,9 +278,7 @@ void generate(int n_gen, const char* file_name) {
 
   TFile* file = new TFile(file_name, "RECREATE");
 
-  for (auto const& p : histo_array) {
-    p->Write();
-  }
+  histo_list->Write();
 
   file->Close();
 
