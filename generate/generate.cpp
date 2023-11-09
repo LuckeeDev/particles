@@ -120,7 +120,7 @@ void generate(int n_gen, const char* file_name) {
       } else {
         event_particles[j].setIndex("k*");
 
-        auto decay_into = gRandom->Rndm();
+        auto decay_into = gRandom->Uniform(0, 1);
 
         Particle decay_product_1{};
         Particle decay_product_2{};
