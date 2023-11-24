@@ -11,3 +11,5 @@
 *.d
 *.so
 *.pcm
+
+!final.root
