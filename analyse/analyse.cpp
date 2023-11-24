@@ -36,7 +36,7 @@ Double_t uniform(Double_t* xx, Double_t* par) { return par[0]; }
 void analyse(const char* file_name) {
   // Set histogram options
   gStyle->SetOptFit(001);
-  gStyle->SetOptStat("");
+  gStyle->SetOptStat("e");
 
   TFile* file = new TFile(file_name, "READ");
 
@@ -165,6 +165,8 @@ void analyse(const char* file_name) {
   invm_subtraction_12->SetXTitle("Invariant mass (GeV)");
   invm_subtraction_12->SetYTitle("Occurrences");
   invm_subtraction_12->Add(invm_opposite_charge_h, invm_same_charge_h, 1, -1);
+  invm_subtraction_12->SetEntries(invm_opposite_charge_h->GetEntries());
+  invm_subtraction_12->SetAxisRange(0.6, 1.2);
 
   TF1* invm_12_fit = new TF1("invm fit 12", gauss, 0., 7., 3);
   invm_12_fit->SetParameter(0, 7.996);
@@ -199,6 +201,8 @@ void analyse(const char* file_name) {
   invm_subtraction_34->SetYTitle("Occurrences");
   invm_subtraction_34->Add(invm_pion_kaon_opposite_h, invm_pion_kaon_same_h, 1,
                            -1);
+  invm_subtraction_34->SetEntries(invm_pion_kaon_opposite_h->GetEntries());
+  invm_subtraction_34->SetAxisRange(0.6, 1.2);
 
   TF1* invm_34_fit = new TF1("invm fit 34", gauss, 0., 7., 3);
   invm_34_fit->SetParameter(0, 7.996);
