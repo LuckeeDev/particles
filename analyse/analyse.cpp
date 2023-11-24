@@ -67,13 +67,14 @@ void analyse(const char* file_name) {
   auto particle_types_histogram = histo_array[0];
 
   // Print generated percentages
-  std::cout << "\nPERCENTAGES" << '\n';
+  std::cout << "\nPARTICLE OCCURRENCES" << '\n';
 
   for (int i{}; i < 7; ++i) {
-    std::cout << "Particle " << PARTICLE_NAMES[i] << ": "
-              << particle_types_histogram->GetBinContent(i + 1) /
-                     particle_types_histogram->GetEntries() * 100
-              << "%" << '\n';
+    auto occurrences = particle_types_histogram->GetBinContent(i + 1);
+
+    std::cout << "Particle " << PARTICLE_NAMES[i] << ": " << occurrences << " ("
+              << occurrences / particle_types_histogram->GetEntries() * 100
+              << "%)" << '\n';
   }
 
   // Create first canvas, with particle types, angles and momentum
