@@ -1,6 +1,7 @@
 #include <array>
 #include <iostream>
 
+#include "TCanvas.h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -17,7 +18,7 @@ Double_t gauss(Double_t* xx, Double_t* par) {
 
 Double_t exp(Double_t* xx, Double_t* par) {
   Double_t x = xx[0];
-  Double_t val = par[0] * TMath::Exp(-par[0] * x);
+  Double_t val = par[0] * TMath::Exp(-x / par[1]);
   return val;
 }
 
@@ -82,8 +83,9 @@ void analyse(const char* file_name) {
             << polar_fit->GetChisquare() / polar_fit->GetNDF() << '\n'
             << "Probability: " << polar_fit->GetProb() << '\n';
 
-  TF1* momentum_fit = new TF1("momentum fit", exp, 0., 9., 1);
-  momentum_fit->SetParameter(0, 1.);
+  TF1* momentum_fit = new TF1("momentum fit", exp, 0., 9., 2);
+  momentum_fit->SetParameter(0, 90000);
+  momentum_fit->SetParameter(1, 1.);
 
   histo_array[3]->Fit(momentum_fit, "Q");
 
@@ -142,4 +144,19 @@ void analyse(const char* file_name) {
             << "Probability" << invm_34_fit->GetProb() << '\n'
             << "K* mass: " << invm_34_fit->GetParameter(1) << '\n'
             << "K* width: " << invm_34_fit->GetParameter(2) << '\n';
+
+  TCanvas* particles_canvas = new TCanvas();
+  particles_canvas->Divide(2, 2);
+
+  particles_canvas->cd(1);
+  histo_array[0]->Draw();
+
+  particles_canvas->cd(2);
+  histo_array[3]->Draw();
+
+  particles_canvas->cd(3);
+  histo_array[1]->Draw();
+
+  particles_canvas->cd(4);
+  histo_array[2]->Draw();
 }
