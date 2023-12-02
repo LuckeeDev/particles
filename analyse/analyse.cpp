@@ -102,7 +102,8 @@ void analyse(const char* file_name) {
   azimutal_angles_histogram->Fit(azimutal_fit, "Q");
 
   std::cout << "\nAZIMUTAL FIT" << '\n'
-            << HEIGHT_LABEL << ": " << azimutal_fit->GetParameter(0) << '\n'
+            << HEIGHT_LABEL << ": " << azimutal_fit->GetParameter(0) << "±"
+            << azimutal_fit->GetParError(0) << '\n'
             << "Chi square/NDF: "
             << azimutal_fit->GetChisquare() / azimutal_fit->GetNDF() << '\n'
             << "Probability: " << azimutal_fit->GetProb() << '\n';
@@ -118,7 +119,8 @@ void analyse(const char* file_name) {
   polar_angles_histogram->Fit(polar_fit, "Q");
 
   std::cout << "\nPOLAR FIT" << '\n'
-            << HEIGHT_LABEL << ": " << polar_fit->GetParameter(0) << '\n'
+            << HEIGHT_LABEL << ": " << polar_fit->GetParameter(0) << "±"
+            << polar_fit->GetParError(0) << '\n'
             << "Chi square/NDF: "
             << polar_fit->GetChisquare() / polar_fit->GetNDF() << '\n'
             << "Probability: " << polar_fit->GetProb() << '\n';
@@ -136,7 +138,8 @@ void analyse(const char* file_name) {
   momentum_histogram->Fit(momentum_fit, "Q");
 
   std::cout << "\nMOMENTUM FIT" << '\n'
-            << HEIGHT_LABEL << ": " << momentum_fit->GetParameter(0) << '\n'
+            << HEIGHT_LABEL << ": " << momentum_fit->GetParameter(0) << "±"
+            << momentum_fit->GetParError(0) << '\n'
             << "Chi square/NDF: "
             << momentum_fit->GetChisquare() / momentum_fit->GetNDF() << '\n'
             << "Probability: " << momentum_fit->GetProb() << '\n';
@@ -145,6 +148,8 @@ void analyse(const char* file_name) {
   TCanvas* inv_mass_canvas = new TCanvas();
   inv_mass_canvas->Divide(2, 2);
   inv_mass_canvas->cd(1);
+
+  // Add first histogram, directly from the generation
   TF1* k_star_fit = new TF1("k_star_fit", gauss, 0.6, 1.2, 3);
   k_star_fit->SetParameter(0, 500);
   k_star_fit->SetParName(0, HEIGHT_LABEL);
@@ -157,6 +162,8 @@ void analyse(const char* file_name) {
   invm_decayed_h->SetYTitle("Occurrences");
   invm_decayed_h->Fit(k_star_fit, "Q");
 
+  // Create second histogram. Find the signal by subtracting same charge
+  // particles from opposite charge particles
   auto invm_opposite_charge_h = histo_array[7];
   auto invm_same_charge_h = histo_array[8];
   TH1F* invm_subtraction_12 = new TH1F(*(TH1F*)invm_opposite_charge_h);
@@ -169,7 +176,7 @@ void analyse(const char* file_name) {
   invm_subtraction_12->SetEntries(invm_opposite_charge_h->GetEntries());
   invm_subtraction_12->SetAxisRange(0.6, 1.2);
 
-  TF1* invm_12_fit = new TF1("invm fit 12", gauss, 0., 7., 3);
+  TF1* invm_12_fit = new TF1("invm_12_fit", gauss, 0., 7., 3);
   invm_12_fit->SetParameter(0, 7.996);
   invm_12_fit->SetParName(0, HEIGHT_LABEL);
   invm_12_fit->SetParameter(1, 0.8919);
@@ -183,15 +190,22 @@ void analyse(const char* file_name) {
   std::cout << "\nINVARIANT MASS BETWEEN ALL PARTICLES (OPPOSITE CHARGE - SAME "
                "CHARGE) FIT"
             << '\n'
-            << HEIGHT_LABEL << ": " << invm_12_fit->GetParameter(0) << '\n'
-            << MEAN_LABEL << ": " << invm_12_fit->GetParameter(1) << '\n'
-            << STDDEV_LABEL << ": " << invm_12_fit->GetParameter(2) << '\n'
-            << "Chi square/NDF :"
+            << HEIGHT_LABEL << ": " << invm_12_fit->GetParameter(0) << "±"
+            << invm_12_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << invm_12_fit->GetParameter(1) << "±"
+            << invm_12_fit->GetParError(1) << '\n'
+            << STDDEV_LABEL << ": " << invm_12_fit->GetParameter(2) << "±"
+            << invm_12_fit->GetParError(2) << '\n'
+            << "Chi square/NDF: "
             << invm_12_fit->GetChisquare() / invm_12_fit->GetNDF() << '\n'
             << "Probability: " << invm_12_fit->GetProb() << '\n'
-            << "K* mass: " << invm_12_fit->GetParameter(1) << '\n'
-            << "K* width: " << invm_12_fit->GetParameter(2) << '\n';
+            << "K* mass: " << invm_12_fit->GetParameter(1) << "±"
+            << invm_12_fit->GetParError(1) << '\n'
+            << "K* width: " << invm_12_fit->GetParameter(2) << "±"
+            << invm_12_fit->GetParError(2) << '\n';
 
+  // Create the third histogram. Find the signal by subtracting kaon & pion with
+  // same charge from kaon & pion with opposite charge
   auto invm_pion_kaon_opposite_h = histo_array[9];
   auto invm_pion_kaon_same_h = histo_array[10];
   TH1F* invm_subtraction_34 = new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
@@ -205,7 +219,7 @@ void analyse(const char* file_name) {
   invm_subtraction_34->SetEntries(invm_pion_kaon_opposite_h->GetEntries());
   invm_subtraction_34->SetAxisRange(0.6, 1.2);
 
-  TF1* invm_34_fit = new TF1("invm fit 34", gauss, 0., 7., 3);
+  TF1* invm_34_fit = new TF1("invm_34_fit", gauss, 0., 7., 3);
   invm_34_fit->SetParameter(0, 7.996);
   invm_34_fit->SetParName(0, HEIGHT_LABEL);
   invm_34_fit->SetParameter(1, 0.8919);
@@ -219,12 +233,17 @@ void analyse(const char* file_name) {
   std::cout << "\nINVARIANT MASS BETWEEN KAON AND PION (OPPOSITE CHARGE - SAME "
                "CHARGE) FIT"
             << '\n'
-            << HEIGHT_LABEL << ": " << invm_34_fit->GetParameter(0) << '\n'
-            << MEAN_LABEL << ": " << invm_34_fit->GetParameter(1) << '\n'
-            << STDDEV_LABEL << ": " << invm_34_fit->GetParameter(2) << '\n'
-            << "Chi square/NDF :"
+            << HEIGHT_LABEL << ": " << invm_34_fit->GetParameter(0) << "±"
+            << invm_34_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << invm_34_fit->GetParameter(1) << "±"
+            << invm_34_fit->GetParError(1) << '\n'
+            << STDDEV_LABEL << ": " << invm_34_fit->GetParameter(2) << "±"
+            << invm_34_fit->GetParError(2) << '\n'
+            << "Chi square/NDF: "
             << invm_34_fit->GetChisquare() / invm_34_fit->GetNDF() << '\n'
             << "Probability: " << invm_34_fit->GetProb() << '\n'
-            << "K* mass: " << invm_34_fit->GetParameter(1) << '\n'
-            << "K* width: " << invm_34_fit->GetParameter(2) << '\n';
+            << "K* mass: " << invm_34_fit->GetParameter(1) << "±"
+            << invm_34_fit->GetParError(1) << '\n'
+            << "K* width: " << invm_34_fit->GetParameter(2) << "±"
+            << invm_34_fit->GetParError(2) << '\n';
 }
