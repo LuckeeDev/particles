@@ -163,7 +163,7 @@ void generate(int n_gen, const char* file_name) {
 
       // momentum xy
       momentum_xy_histogram->Fill(
-          std::sqrt(momentum.x * momentum.x + momentum.y + momentum.y));
+          std::sqrt(momentum.x * momentum.x + momentum.y * momentum.y));
 
       // energy
       energy_histogram->Fill(new_particle.getEnergy());
