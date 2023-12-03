@@ -49,9 +49,9 @@ void generate(int n_gen, const char* file_name) {
       new TH1F("momentum_histogram", "Momentum", 1e3, 0, 9);
   histo_list->Add(momentum_histogram);  // 3
 
-  TH1F* momentum_xy_istogram =
+  TH1F* momentum_xy_histogram =
       new TH1F("momentum_xy_histogram", "Momentum xy", 1e3, 0, 9);
-  histo_list->Add(momentum_xy_istogram);  // 4
+  histo_list->Add(momentum_xy_histogram);  // 4
 
   TH1F* energy_histogram = new TH1F("energy_histogram", "Energy", 1e4, 0, 4);
   histo_list->Add(energy_histogram);  // 5
@@ -163,7 +163,7 @@ void generate(int n_gen, const char* file_name) {
       momentum_histogram->Fill(std::sqrt(momentum * momentum));
 
       // momentum xy
-      momentum_xy_istogram->Fill(
+      momentum_xy_histogram->Fill(
           std::sqrt(momentum.x * momentum.x + momentum.y + momentum.y));
 
       // energy
