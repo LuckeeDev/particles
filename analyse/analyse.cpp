@@ -160,6 +160,7 @@ void analyse(const char* file_name) {
   k_star_fit->SetParameter(2, 0.05);
   k_star_fit->SetParName(2, STDDEV_LABEL);
   auto invm_decayed_h = histo_array[11];
+  invm_decayed_h->SetTitle("Decay products");
   invm_decayed_h->SetXTitle("Invariant mass (GeV)");
   invm_decayed_h->SetYTitle("Occurrences");
   invm_decayed_h->Fit(k_star_fit, "Q");
@@ -169,8 +170,7 @@ void analyse(const char* file_name) {
   auto invm_opposite_charge_h = histo_array[7];
   auto invm_same_charge_h = histo_array[8];
   TH1F* invm_subtraction_12 = new TH1F(*(TH1F*)invm_opposite_charge_h);
-  invm_subtraction_12->SetTitle(
-      "Invariant mass, all (opposite charge - same charge)");
+  invm_subtraction_12->SetTitle("Opposite charge - same charge");
   invm_subtraction_12->SetName("invm_subtraction_12");
   invm_subtraction_12->SetXTitle("Invariant mass (GeV)");
   invm_subtraction_12->SetYTitle("Occurrences");
@@ -211,8 +211,7 @@ void analyse(const char* file_name) {
   auto invm_pion_kaon_opposite_h = histo_array[9];
   auto invm_pion_kaon_same_h = histo_array[10];
   TH1F* invm_subtraction_34 = new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
-  invm_subtraction_34->SetTitle(
-      "Invariant mass, kaon & pion (opposite charge - same charge)");
+  invm_subtraction_34->SetTitle("Opposite charge - same charge (kaon & pion)");
   invm_subtraction_34->SetName("invm_subtraction_34");
   invm_subtraction_34->SetXTitle("Invariant mass (GeV)");
   invm_subtraction_34->SetYTitle("Occurrences");
