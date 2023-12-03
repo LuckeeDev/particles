@@ -140,6 +140,8 @@ void analyse(const char* file_name) {
   std::cout << "\nMOMENTUM FIT" << '\n'
             << HEIGHT_LABEL << ": " << momentum_fit->GetParameter(0) << "±"
             << momentum_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << momentum_fit->GetParameter(1) << "±"
+            << momentum_fit->GetParError(1) << '\n'
             << "Chi square/NDF: "
             << momentum_fit->GetChisquare() / momentum_fit->GetNDF() << '\n'
             << "Probability: " << momentum_fit->GetProb() << '\n';
