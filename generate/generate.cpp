@@ -58,29 +58,29 @@ void generate(int n_gen, const char* file_name) {
 
   // invariant mass histograms
   TH1F* invm_all_h =
-      new TH1F("invm_all_h", "Invariant mass, all particles", 1e4, 0, 7);
+      new TH1F("invm_all_h", "Invariant mass, all particles", 1e4, 0, 9);
   invm_all_h->Sumw2();
   histo_list->Add(invm_all_h);  // 6
 
   TH1F* invm_opposite_charge_h = new TH1F(
-      "invm_opposite_charge_h", "Invariant mass, opposite charge", 1e4, 0, 7);
+      "invm_opposite_charge_h", "Invariant mass, opposite charge", 1e4, 0, 9);
   invm_opposite_charge_h->Sumw2();
   histo_list->Add(invm_opposite_charge_h);  // 7
 
   TH1F* invm_same_charge_h =
-      new TH1F("invm_same_charge_h", "Invariant mass, same charge", 1e4, 0, 7);
+      new TH1F("invm_same_charge_h", "Invariant mass, same charge", 1e4, 0, 9);
   invm_same_charge_h->Sumw2();
   histo_list->Add(invm_same_charge_h);  // 8
 
   TH1F* invm_pion_kaon_opposite_h =
       new TH1F("invm_pion_kaon_opposite_h",
-               "Invariant mass, pion+ and kaon- or pion- and kaon+", 1e4, 0, 7);
+               "Invariant mass, pion+ and kaon- or pion- and kaon+", 1e4, 0, 9);
   invm_pion_kaon_opposite_h->Sumw2();
   histo_list->Add(invm_pion_kaon_opposite_h);  // 9
 
   TH1F* invm_pion_kaon_same_h =
       new TH1F("invm_pion_kaon_same_h",
-               "Invariant mass, pion+ and kaon+ or pion- and kaon-", 1e4, 0, 7);
+               "Invariant mass, pion+ and kaon+ or pion- and kaon-", 1e4, 0, 9);
   invm_pion_kaon_same_h->Sumw2();
   histo_list->Add(invm_pion_kaon_same_h);  // 10
 
@@ -125,7 +125,6 @@ void generate(int n_gen, const char* file_name) {
         Particle decay_product_1{};
         Particle decay_product_2{};
 
-        // TODO: fill invariant mass histograms with data from decayed particles
         if (decay_into <= 0.5) {
           decay_product_1.setIndex("pion+");
           decay_product_2.setIndex("kaon-");
