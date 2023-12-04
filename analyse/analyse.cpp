@@ -34,7 +34,7 @@ Double_t exp(Double_t* xx, Double_t* par) {
 Double_t uniform(Double_t* xx, Double_t* par) { return par[0]; }
 
 void analyse(const char* file_name) {
-  // Set histogram options
+  // Set histogram options. Show entries, parameters, errors and chi square/DOF
   gStyle->SetOptFit(001);
   gStyle->SetOptStat("e");
 
@@ -42,12 +42,12 @@ void analyse(const char* file_name) {
 
   std::array<TH1*, 12> histo_array;
 
+  // Read histograms from TList and put them inside an array
   auto key_list = file->GetListOfKeys();
 
   for (int i{}; i < 12; ++i) {
     auto key = (TKey*)key_list->At(i);
-    auto histo = (TH1*)file->Get(key->GetName());
-    histo_array[i] = histo;
+    histo_array[i] = (TH1*)file->Get(key->GetName());
   }
 
   std::array<double, 12> expected_entries{
@@ -58,10 +58,10 @@ void analyse(const char* file_name) {
 
   for (int i{}; i < 12; ++i) {
     auto title = histo_array[i]->GetTitle();
-    auto reached_entries_i = histo_array[i]->GetEntries();
+    auto entries = histo_array[i]->GetEntries();
 
     std::cout << title << ": expected " << expected_entries[i] << ", got "
-              << reached_entries_i << '\n';
+              << entries << '\n';
   }
 
   auto particle_types_histogram = histo_array[0];
@@ -81,6 +81,7 @@ void analyse(const char* file_name) {
   TCanvas* particles_canvas = new TCanvas();
   particles_canvas->Divide(2, 2);
 
+  // Add first histogram with particle type occurrences
   particles_canvas->cd(1);
   auto x_axis = particle_types_histogram->GetXaxis();
   x_axis->CenterLabels();
@@ -91,6 +92,7 @@ void analyse(const char* file_name) {
   particle_types_histogram->SetYTitle("Occurrences");
   particle_types_histogram->Draw();
 
+  // Add and fit azimutal angles histogram
   TF1* azimutal_fit = new TF1("azimutal_fit", uniform, 0., TMath::Pi(), 1);
   azimutal_fit->SetParameter(0, 10000);
   azimutal_fit->SetParName(0, HEIGHT_LABEL);
@@ -108,6 +110,7 @@ void analyse(const char* file_name) {
             << azimutal_fit->GetChisquare() / azimutal_fit->GetNDF() << '\n'
             << "Probability: " << azimutal_fit->GetProb() << '\n';
 
+  // Add and fit polar angles histogram
   TF1* polar_fit = new TF1("polar_fit", uniform, 0., TMath::TwoPi(), 1);
   polar_fit->SetParameter(0, 10000);
   polar_fit->SetParName(0, HEIGHT_LABEL);
@@ -125,7 +128,8 @@ void analyse(const char* file_name) {
             << polar_fit->GetChisquare() / polar_fit->GetNDF() << '\n'
             << "Probability: " << polar_fit->GetProb() << '\n';
 
-  TF1* momentum_fit = new TF1("momentum fit", exp, 0., 9., 2);
+  // Add and fit momentum histogram
+  TF1* momentum_fit = new TF1("momentum_fit", exp, 0., 9., 2);
   momentum_fit->SetParameter(0, 90000);
   momentum_fit->SetParName(0, HEIGHT_LABEL);
   momentum_fit->SetParameter(1, 1.);
@@ -151,7 +155,7 @@ void analyse(const char* file_name) {
   inv_mass_canvas->Divide(2, 2);
   inv_mass_canvas->cd(1);
 
-  // Add first histogram, directly from the generation
+  // Add first histogram directly from the generation
   TF1* k_star_fit = new TF1("k_star_fit", gauss, 0.6, 1.2, 3);
   k_star_fit->SetParameter(0, 500);
   k_star_fit->SetParName(0, HEIGHT_LABEL);
@@ -169,82 +173,86 @@ void analyse(const char* file_name) {
   // particles from opposite charge particles
   auto invm_opposite_charge_h = histo_array[7];
   auto invm_same_charge_h = histo_array[8];
-  TH1F* invm_subtraction_12 = new TH1F(*(TH1F*)invm_opposite_charge_h);
-  invm_subtraction_12->SetTitle("Opposite charge - same charge");
-  invm_subtraction_12->SetName("invm_subtraction_12");
-  invm_subtraction_12->SetXTitle("Invariant mass (GeV)");
-  invm_subtraction_12->SetYTitle("Occurrences");
-  invm_subtraction_12->Add(invm_opposite_charge_h, invm_same_charge_h, 1, -1);
-  invm_subtraction_12->SetEntries(invm_opposite_charge_h->GetEntries());
-  invm_subtraction_12->SetAxisRange(0.6, 1.2);
+  TH1F* invm_subtraction_all = new TH1F(*(TH1F*)invm_opposite_charge_h);
+  invm_subtraction_all->SetTitle("Opposite charge - same charge");
+  invm_subtraction_all->SetName("invm_subtraction_all");
+  invm_subtraction_all->SetXTitle("Invariant mass (GeV)");
+  invm_subtraction_all->SetYTitle("Occurrences");
+  invm_subtraction_all->Add(invm_opposite_charge_h, invm_same_charge_h, 1, -1);
+  invm_subtraction_all->SetEntries(invm_opposite_charge_h->GetEntries());
+  invm_subtraction_all->SetAxisRange(0.6, 1.2);
 
-  TF1* invm_12_fit = new TF1("invm_12_fit", gauss, 0., 7., 3);
-  invm_12_fit->SetParameter(0, 7.996);
-  invm_12_fit->SetParName(0, HEIGHT_LABEL);
-  invm_12_fit->SetParameter(1, 0.8919);
-  invm_12_fit->SetParName(1, MEAN_LABEL);
-  invm_12_fit->SetParameter(2, 0.04989);
-  invm_12_fit->SetParName(2, STDDEV_LABEL);
+  TF1* invm_all_fit = new TF1("invm_all_fit", gauss, 0., 7., 3);
+  invm_all_fit->SetParameter(0, 7.996);
+  invm_all_fit->SetParName(0, HEIGHT_LABEL);
+  invm_all_fit->SetParameter(1, 0.8919);
+  invm_all_fit->SetParName(1, MEAN_LABEL);
+  invm_all_fit->SetParameter(2, 0.04989);
+  invm_all_fit->SetParName(2, STDDEV_LABEL);
 
   inv_mass_canvas->cd(2);
-  invm_subtraction_12->Fit(invm_12_fit, "Q");
+  invm_subtraction_all->Fit(invm_all_fit, "Q");
 
   std::cout << "\nINVARIANT MASS BETWEEN ALL PARTICLES (OPPOSITE CHARGE - SAME "
                "CHARGE) FIT"
             << '\n'
-            << HEIGHT_LABEL << ": " << invm_12_fit->GetParameter(0) << "±"
-            << invm_12_fit->GetParError(0) << '\n'
-            << MEAN_LABEL << ": " << invm_12_fit->GetParameter(1) << "±"
-            << invm_12_fit->GetParError(1) << '\n'
-            << STDDEV_LABEL << ": " << invm_12_fit->GetParameter(2) << "±"
-            << invm_12_fit->GetParError(2) << '\n'
+            << HEIGHT_LABEL << ": " << invm_all_fit->GetParameter(0) << "±"
+            << invm_all_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << invm_all_fit->GetParameter(1) << "±"
+            << invm_all_fit->GetParError(1) << '\n'
+            << STDDEV_LABEL << ": " << invm_all_fit->GetParameter(2) << "±"
+            << invm_all_fit->GetParError(2) << '\n'
             << "Chi square/NDF: "
-            << invm_12_fit->GetChisquare() / invm_12_fit->GetNDF() << '\n'
-            << "Probability: " << invm_12_fit->GetProb() << '\n'
-            << "K* mass: " << invm_12_fit->GetParameter(1) << "±"
-            << invm_12_fit->GetParError(1) << '\n'
-            << "K* width: " << invm_12_fit->GetParameter(2) << "±"
-            << invm_12_fit->GetParError(2) << '\n';
+            << invm_all_fit->GetChisquare() / invm_all_fit->GetNDF() << '\n'
+            << "Probability: " << invm_all_fit->GetProb() << '\n'
+            << "K* mass: " << invm_all_fit->GetParameter(1) << "±"
+            << invm_all_fit->GetParError(1) << '\n'
+            << "K* width: " << invm_all_fit->GetParameter(2) << "±"
+            << invm_all_fit->GetParError(2) << '\n';
 
   // Create the third histogram. Find the signal by subtracting kaon & pion with
   // same charge from kaon & pion with opposite charge
   auto invm_pion_kaon_opposite_h = histo_array[9];
   auto invm_pion_kaon_same_h = histo_array[10];
-  TH1F* invm_subtraction_34 = new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
-  invm_subtraction_34->SetTitle("Opposite charge - same charge (kaon & pion)");
-  invm_subtraction_34->SetName("invm_subtraction_34");
-  invm_subtraction_34->SetXTitle("Invariant mass (GeV)");
-  invm_subtraction_34->SetYTitle("Occurrences");
-  invm_subtraction_34->Add(invm_pion_kaon_opposite_h, invm_pion_kaon_same_h, 1,
-                           -1);
-  invm_subtraction_34->SetEntries(invm_pion_kaon_opposite_h->GetEntries());
-  invm_subtraction_34->SetAxisRange(0.6, 1.2);
+  TH1F* invm_subtraction_pion_kaon =
+      new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
+  invm_subtraction_pion_kaon->SetTitle(
+      "Opposite charge - same charge (kaon & pion)");
+  invm_subtraction_pion_kaon->SetName("invm_subtraction_pion_kaon");
+  invm_subtraction_pion_kaon->SetXTitle("Invariant mass (GeV)");
+  invm_subtraction_pion_kaon->SetYTitle("Occurrences");
+  invm_subtraction_pion_kaon->Add(invm_pion_kaon_opposite_h,
+                                  invm_pion_kaon_same_h, 1, -1);
+  invm_subtraction_pion_kaon->SetEntries(
+      invm_pion_kaon_opposite_h->GetEntries());
+  invm_subtraction_pion_kaon->SetAxisRange(0.6, 1.2);
 
-  TF1* invm_34_fit = new TF1("invm_34_fit", gauss, 0., 7., 3);
-  invm_34_fit->SetParameter(0, 7.996);
-  invm_34_fit->SetParName(0, HEIGHT_LABEL);
-  invm_34_fit->SetParameter(1, 0.8919);
-  invm_34_fit->SetParName(1, MEAN_LABEL);
-  invm_34_fit->SetParameter(2, 0.04989);
-  invm_34_fit->SetParName(2, STDDEV_LABEL);
+  TF1* invm_pion_kaon_fit = new TF1("invm_pion_kaon_fit", gauss, 0., 7., 3);
+  invm_pion_kaon_fit->SetParameter(0, 7.996);
+  invm_pion_kaon_fit->SetParName(0, HEIGHT_LABEL);
+  invm_pion_kaon_fit->SetParameter(1, 0.8919);
+  invm_pion_kaon_fit->SetParName(1, MEAN_LABEL);
+  invm_pion_kaon_fit->SetParameter(2, 0.04989);
+  invm_pion_kaon_fit->SetParName(2, STDDEV_LABEL);
 
   inv_mass_canvas->cd(3);
-  invm_subtraction_34->Fit(invm_34_fit, "Q");
+  invm_subtraction_pion_kaon->Fit(invm_pion_kaon_fit, "Q");
 
   std::cout << "\nINVARIANT MASS BETWEEN KAON AND PION (OPPOSITE CHARGE - SAME "
                "CHARGE) FIT"
             << '\n'
-            << HEIGHT_LABEL << ": " << invm_34_fit->GetParameter(0) << "±"
-            << invm_34_fit->GetParError(0) << '\n'
-            << MEAN_LABEL << ": " << invm_34_fit->GetParameter(1) << "±"
-            << invm_34_fit->GetParError(1) << '\n'
-            << STDDEV_LABEL << ": " << invm_34_fit->GetParameter(2) << "±"
-            << invm_34_fit->GetParError(2) << '\n'
+            << HEIGHT_LABEL << ": " << invm_pion_kaon_fit->GetParameter(0)
+            << "±" << invm_pion_kaon_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << invm_pion_kaon_fit->GetParameter(1) << "±"
+            << invm_pion_kaon_fit->GetParError(1) << '\n'
+            << STDDEV_LABEL << ": " << invm_pion_kaon_fit->GetParameter(2)
+            << "±" << invm_pion_kaon_fit->GetParError(2) << '\n'
             << "Chi square/NDF: "
-            << invm_34_fit->GetChisquare() / invm_34_fit->GetNDF() << '\n'
-            << "Probability: " << invm_34_fit->GetProb() << '\n'
-            << "K* mass: " << invm_34_fit->GetParameter(1) << "±"
-            << invm_34_fit->GetParError(1) << '\n'
-            << "K* width: " << invm_34_fit->GetParameter(2) << "±"
-            << invm_34_fit->GetParError(2) << '\n';
+            << invm_pion_kaon_fit->GetChisquare() / invm_pion_kaon_fit->GetNDF()
+            << '\n'
+            << "Probability: " << invm_pion_kaon_fit->GetProb() << '\n'
+            << "K* mass: " << invm_pion_kaon_fit->GetParameter(1) << "±"
+            << invm_pion_kaon_fit->GetParError(1) << '\n'
+            << "K* width: " << invm_pion_kaon_fit->GetParameter(2) << "±"
+            << invm_pion_kaon_fit->GetParError(2) << '\n';
 }
