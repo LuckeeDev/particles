@@ -1,4 +1,3 @@
-#include <array>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -20,6 +19,7 @@ void generate(int n_gen, const char* file_name) {
   R__LOAD_LIBRARY(ResonanceType_cpp.so)
   R__LOAD_LIBRARY(Particle_cpp.so)
 
+  // mass and width measured in GeV/c^2
   Particle::addParticleType("pion+", 0.13957, 1);
   Particle::addParticleType("pion-", 0.13957, -1);
   Particle::addParticleType("kaon+", 0.49367, 1);
@@ -33,28 +33,28 @@ void generate(int n_gen, const char* file_name) {
   TList* histo_list = new TList();
 
   // particle histograms
-  TH1I* particle_types_histogram =
-      new TH1I("particle_types_histogram", "Particle types", 7, 0, 7);
-  histo_list->Add(particle_types_histogram);  // 0
+  TH1I* particle_types_h =
+      new TH1I("particle_types_h", "Particle types", 7, 0, 7);
+  histo_list->Add(particle_types_h);  // 0
 
-  TH1F* azimutal_angles_histogram = new TH1F(
-      "azimutal_angles_histogram", "Azimutal angles", 1e3, 0, TMath::Pi());
-  histo_list->Add(azimutal_angles_histogram);  // 1
+  TH1F* azimutal_angles_h = new TH1F(
+      "azimutal_angles_h", "Azimutal angles", 1e3, 0, TMath::Pi());
+  histo_list->Add(azimutal_angles_h);  // 1
 
-  TH1F* polar_angles_histogram = new TH1F(
-      "polar_angles_histogram", "Polar angles", 1e3, 0, TMath::Pi() * 2.);
-  histo_list->Add(polar_angles_histogram);  // 2
+  TH1F* polar_angles_h = new TH1F(
+      "polar_angles_h", "Polar angles", 1e3, 0, TMath::Pi() * 2.);
+  histo_list->Add(polar_angles_h);  // 2
 
-  TH1F* momentum_histogram =
-      new TH1F("momentum_histogram", "Momentum", 1e3, 0, 9);
-  histo_list->Add(momentum_histogram);  // 3
+  TH1F* momentum_h =
+      new TH1F("momentum_h", "Momentum", 1e3, 0, 9);
+  histo_list->Add(momentum_h);  // 3
 
-  TH1F* momentum_xy_histogram =
-      new TH1F("momentum_xy_histogram", "Momentum xy", 1e3, 0, 9);
-  histo_list->Add(momentum_xy_histogram);  // 4
+  TH1F* momentum_xy_h =
+      new TH1F("momentum_xy_h", "Momentum xy", 1e3, 0, 9);
+  histo_list->Add(momentum_xy_h);  // 4
 
-  TH1F* energy_histogram = new TH1F("energy_histogram", "Energy", 1e4, 0, 4);
-  histo_list->Add(energy_histogram);  // 5
+  TH1F* energy_h = new TH1F("energy_h", "Energy", 1e4, 0, 4);
+  histo_list->Add(energy_h);  // 5
 
   // invariant mass histograms
   TH1F* invm_all_h =
@@ -95,13 +95,13 @@ void generate(int n_gen, const char* file_name) {
 
     event_particles.reserve(150);
 
-    for (int j{}; j < 1e2; ++j) {
-      auto phi = gRandom->Uniform(0, TMath::Pi() * 2.);
+    for (int j{}; j < 100; ++j) {
+      auto r = gRandom->Exp(1);  // GeV
       auto theta = gRandom->Uniform(0, TMath::Pi());
-      auto rho = gRandom->Exp(1);  // GeV
+      auto phi = gRandom->Uniform(0, TMath::Pi() * 2.);
 
       // convert polar to cartesian coordinates
-      event_particles[j].setMomentum(Momentum{PolarVector{rho, theta, phi}});
+      event_particles[j].setMomentum(Momentum{PolarVector{r, theta, phi}});
 
       auto x = gRandom->Uniform(0, 1);
 
@@ -147,26 +147,26 @@ void generate(int n_gen, const char* file_name) {
       auto const& new_particle = event_particles[j];
 
       // type
-      particle_types_histogram->Fill(new_particle.getIndex().value());
+      particle_types_h->Fill(new_particle.getIndex().value());
 
       auto momentum = new_particle.getMomentum();
       auto polar_momentum = momentum.getPolar();
 
       // azimutal angle
-      azimutal_angles_histogram->Fill(polar_momentum.theta);
+      azimutal_angles_h->Fill(polar_momentum.theta);
 
       // polar angle
-      polar_angles_histogram->Fill(polar_momentum.phi);
+      polar_angles_h->Fill(polar_momentum.phi);
 
       // momentum
-      momentum_histogram->Fill(std::sqrt(momentum * momentum));
+      momentum_h->Fill(std::sqrt(momentum * momentum));
 
       // momentum xy
-      momentum_xy_histogram->Fill(
+      momentum_xy_h->Fill(
           std::sqrt(momentum.x * momentum.x + momentum.y * momentum.y));
 
       // energy
-      energy_histogram->Fill(new_particle.getEnergy());
+      energy_h->Fill(new_particle.getEnergy());
 
       // invariant mass
       if (new_particle.getName() != "k*") {
