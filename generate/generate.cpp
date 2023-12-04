@@ -12,6 +12,46 @@
 #include "TMath.h"
 #include "TRandom.h"
 
+/**
+ * Helper function to fill invariant mass histograms with data coming from two
+ * particles.
+ */
+void fillHistograms(Particle const& particle_1, Particle const& particle_2,
+                    TH1F* invm_all_h, TH1F* invm_opposite_charge_h,
+                    TH1F* invm_same_charge_h, TH1F* invm_pion_kaon_opposite_h,
+                    TH1F* invm_pion_kaon_same_h) {
+  auto invariant_mass = particle_1.getInvariantMass(particle_2);
+
+  // invariant mass with all particles
+  invm_all_h->Fill(invariant_mass);
+
+  // invariant mass with opposite charge particles
+  if (particle_2.getCharge() * particle_1.getCharge() < 0) {
+    invm_opposite_charge_h->Fill(invariant_mass);
+  }
+
+  // invariant mass with same charge particles
+  if (particle_2.getCharge() * particle_1.getCharge() > 0) {
+    invm_same_charge_h->Fill(invariant_mass);
+  }
+
+  // invariant mass with pion+ and kaon- or pion- and kaon+
+  if ((particle_1.getName() == "pion+" && particle_2.getName() == "kaon-") ||
+      (particle_1.getName() == "kaon-" && particle_2.getName() == "pion+") ||
+      (particle_1.getName() == "pion-" && particle_2.getName() == "kaon+") ||
+      (particle_1.getName() == "kaon+" && particle_2.getName() == "pion-")) {
+    invm_pion_kaon_opposite_h->Fill(invariant_mass);
+  }
+
+  // invariant mass with pion+ and kaon+ or piaon- and kaon-
+  if ((particle_1.getName() == "pion+" && particle_2.getName() == "kaon+") ||
+      (particle_1.getName() == "kaon+" && particle_2.getName() == "pion+") ||
+      (particle_1.getName() == "pion-" && particle_2.getName() == "kaon-") ||
+      (particle_1.getName() == "kaon-" && particle_2.getName() == "pion-")) {
+    invm_pion_kaon_same_h->Fill(invariant_mass);
+  }
+}
+
 void generate(int n_gen, const char* file_name) {
   gBenchmark->Start("Benchmark");
 
@@ -37,20 +77,18 @@ void generate(int n_gen, const char* file_name) {
       new TH1I("particle_types_h", "Particle types", 7, 0, 7);
   histo_list->Add(particle_types_h);  // 0
 
-  TH1F* azimutal_angles_h = new TH1F(
-      "azimutal_angles_h", "Azimutal angles", 1e3, 0, TMath::Pi());
+  TH1F* azimutal_angles_h =
+      new TH1F("azimutal_angles_h", "Azimutal angles", 1e3, 0, TMath::Pi());
   histo_list->Add(azimutal_angles_h);  // 1
 
-  TH1F* polar_angles_h = new TH1F(
-      "polar_angles_h", "Polar angles", 1e3, 0, TMath::Pi() * 2.);
+  TH1F* polar_angles_h =
+      new TH1F("polar_angles_h", "Polar angles", 1e3, 0, TMath::Pi() * 2.);
   histo_list->Add(polar_angles_h);  // 2
 
-  TH1F* momentum_h =
-      new TH1F("momentum_h", "Momentum", 1e3, 0, 9);
+  TH1F* momentum_h = new TH1F("momentum_h", "Momentum", 1e3, 0, 9);
   histo_list->Add(momentum_h);  // 3
 
-  TH1F* momentum_xy_h =
-      new TH1F("momentum_xy_h", "Momentum xy", 1e3, 0, 9);
+  TH1F* momentum_xy_h = new TH1F("momentum_xy_h", "Momentum xy", 1e3, 0, 9);
   histo_list->Add(momentum_xy_h);  // 4
 
   TH1F* energy_h = new TH1F("energy_h", "Energy", 1e4, 0, 4);
@@ -168,7 +206,9 @@ void generate(int n_gen, const char* file_name) {
       // energy
       energy_h->Fill(new_particle.getEnergy());
 
-      // invariant mass
+      // Fill invariant mass histograms. This loop improves performance because
+      // it avoids unnecessary iterations in the loop after completing the event
+      // generation
       if (new_particle.getName() != "k*") {
         for (auto invm_i = j - 1; invm_i >= 0; --invm_i) {
           auto const& invm_particle = event_particles[invm_i];
@@ -177,44 +217,9 @@ void generate(int n_gen, const char* file_name) {
             continue;
           }
 
-          auto invariant_mass = new_particle.getInvariantMass(invm_particle);
-
-          // invariant mass with all particles
-          invm_all_h->Fill(invariant_mass);
-
-          // invariant mass with opposite charge particles
-          if (invm_particle.getCharge() * new_particle.getCharge() < 0) {
-            invm_opposite_charge_h->Fill(invariant_mass);
-          }
-
-          // invariant mass with same charge particles
-          if (invm_particle.getCharge() * new_particle.getCharge() > 0) {
-            invm_same_charge_h->Fill(invariant_mass);
-          }
-
-          // invariant mass with pion+ and kaon- or pion- and kaon+
-          if ((new_particle.getName() == "pion+" &&
-               invm_particle.getName() == "kaon-") ||
-              (new_particle.getName() == "kaon-" &&
-               invm_particle.getName() == "pion+") ||
-              (new_particle.getName() == "pion-" &&
-               invm_particle.getName() == "kaon+") ||
-              (new_particle.getName() == "kaon+" &&
-               invm_particle.getName() == "pion-")) {
-            invm_pion_kaon_opposite_h->Fill(invariant_mass);
-          }
-
-          // invariant mass with pion+ and kaon+ or piaon- and kaon-
-          if ((new_particle.getName() == "pion+" &&
-               invm_particle.getName() == "kaon+") ||
-              (new_particle.getName() == "kaon+" &&
-               invm_particle.getName() == "pion+") ||
-              (new_particle.getName() == "pion-" &&
-               invm_particle.getName() == "kaon-") ||
-              (new_particle.getName() == "kaon-" &&
-               invm_particle.getName() == "pion-")) {
-            invm_pion_kaon_same_h->Fill(invariant_mass);
-          }
+          fillHistograms(new_particle, invm_particle, invm_all_h,
+                         invm_opposite_charge_h, invm_same_charge_h,
+                         invm_pion_kaon_opposite_h, invm_pion_kaon_same_h);
         }
       }
     }
@@ -234,44 +239,9 @@ void generate(int n_gen, const char* file_name) {
           continue;
         }
 
-        auto invariant_mass = decayed_particle.getInvariantMass(invm_particle);
-
-        // invariant mass with all particles
-        invm_all_h->Fill(invariant_mass);
-
-        // invariant mass with opposite charge particles
-        if (invm_particle.getCharge() * decayed_particle.getCharge() < 0) {
-          invm_opposite_charge_h->Fill(invariant_mass);
-        }
-
-        // invariant mass with same charge particles
-        if (invm_particle.getCharge() * decayed_particle.getCharge() > 0) {
-          invm_same_charge_h->Fill(invariant_mass);
-        }
-
-        // invariant mass with pion+ and kaon- or pion- and kaon+
-        if ((decayed_particle.getName() == "pion+" &&
-             invm_particle.getName() == "kaon-") ||
-            (decayed_particle.getName() == "kaon-" &&
-             invm_particle.getName() == "pion+") ||
-            (decayed_particle.getName() == "pion-" &&
-             invm_particle.getName() == "kaon+") ||
-            (decayed_particle.getName() == "kaon+" &&
-             invm_particle.getName() == "pion-")) {
-          invm_pion_kaon_opposite_h->Fill(invariant_mass);
-        }
-
-        // invariant mass with pion+ and kaon+ or piaon- and kaon-
-        if ((decayed_particle.getName() == "pion+" &&
-             invm_particle.getName() == "kaon+") ||
-            (decayed_particle.getName() == "kaon+" &&
-             invm_particle.getName() == "pion+") ||
-            (decayed_particle.getName() == "pion-" &&
-             invm_particle.getName() == "kaon-") ||
-            (decayed_particle.getName() == "kaon-" &&
-             invm_particle.getName() == "pion-")) {
-          invm_pion_kaon_same_h->Fill(invariant_mass);
-        }
+        fillHistograms(decayed_particle, invm_particle, invm_all_h,
+                       invm_opposite_charge_h, invm_same_charge_h,
+                       invm_pion_kaon_opposite_h, invm_pion_kaon_same_h);
       }
     }
   }
