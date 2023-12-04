@@ -13,6 +13,7 @@ struct PolarVector {
   double theta;
   double phi;
 };
+
 struct Momentum {
   double x;
   double y;
@@ -32,7 +33,7 @@ class Particle {
 
   void printData() const;
 
-  int decayToBody(Particle& dau1, Particle& dau2) const;
+  int decayToBody(Particle&, Particle&) const;
 
   // setters
 
@@ -61,10 +62,10 @@ class Particle {
   Momentum m_momentum;
   std::optional<int> m_index;
 
-  void boost(double bx, double by, double bz);
+  void boost(double, double, double);
 
   static std::vector<std::unique_ptr<ParticleType>> m_particle_types;
-  static std::optional<int> mFindParticleIndex(std::string const& name);
+  static std::optional<int> mFindParticleIndex(std::string const&);
 };
 
 #endif

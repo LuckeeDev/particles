@@ -88,12 +88,12 @@ int Particle::decayToBody(Particle& dau1, Particle& dau2) const {
 
     double invnum = 1. / RAND_MAX;
     do {
-      x1 = 2.0 * rand() * invnum - 1.0;
-      x2 = 2.0 * rand() * invnum - 1.0;
+      x1 = 2.0 * std::rand() * invnum - 1.0;
+      x2 = 2.0 * std::rand() * invnum - 1.0;
       w = x1 * x1 + x2 * x2;
     } while (w >= 1.0);
 
-    w = sqrt((-2.0 * log(w)) / w);
+    w = std::sqrt((-2.0 * std::log(w)) / w);
     y1 = x1 * w;
 
     massMot += m_particle_types[m_index.value()]->getWidth() * y1;
@@ -107,24 +107,26 @@ int Particle::decayToBody(Particle& dau1, Particle& dau2) const {
   }
 
   double pout =
-      sqrt(
+      std::sqrt(
           (massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) *
           (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) /
       massMot * 0.5;
 
   double norm = 2 * M_PI / RAND_MAX;
 
-  double phi = rand() * norm;
-  double theta = rand() * norm * 0.5 - M_PI / 2.;
+  double phi = std::rand() * norm;
+  double theta = std::rand() * norm * 0.5 - M_PI / 2.;
 
-  dau1.setMomentum(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi),
-                   pout * cos(theta));
-  dau2.setMomentum(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi),
-                   -pout * cos(theta));
+  dau1.setMomentum(pout * std::sin(theta) * std::cos(phi),
+                   pout * std::sin(theta) * std::sin(phi),
+                   pout * std::cos(theta));
+  dau2.setMomentum(-pout * std::sin(theta) * std::cos(phi),
+                   -pout * std::sin(theta) * std::sin(phi),
+                   -pout * std::cos(theta));
 
   double energy =
-      sqrt(m_momentum.x * m_momentum.x + m_momentum.y * m_momentum.y +
-           m_momentum.z * m_momentum.z + massMot * massMot);
+      std::sqrt(m_momentum.x * m_momentum.x + m_momentum.y * m_momentum.y +
+                m_momentum.z * m_momentum.z + massMot * massMot);
 
   double bx = m_momentum.x / energy;
   double by = m_momentum.y / energy;
@@ -244,7 +246,7 @@ void Particle::addParticleType(std::string const& name, double mass, int charge,
 void Particle::printParticleTypes() {
   auto v_end = m_particle_types.end();
 
-  for (auto it{m_particle_types.begin()}; it < v_end; ++it) {
+  for (auto it = m_particle_types.begin(); it < v_end; ++it) {
     (*it)->print();
 
     if (it != v_end - 1) {
@@ -276,7 +278,7 @@ void Particle::boost(double bx, double by, double bz) {
 
   // Boost this Lorentz vector
   double b2 = bx * bx + by * by + bz * bz;
-  double gamma = 1.0 / sqrt(1.0 - b2);
+  double gamma = 1.0 / std::sqrt(1.0 - b2);
   double bp = bx * m_momentum.x + by * m_momentum.y + bz * m_momentum.z;
   double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
 
