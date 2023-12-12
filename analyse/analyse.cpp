@@ -11,11 +11,17 @@
 #include "TStyle.h"
 
 // Define repeated constants
+// Labels for fit parameters
 const char* HEIGHT_LABEL = "Height (p0)";
 const char* MEAN_LABEL = "Mean (p1)";
 const char* STDDEV_LABEL = "Std. dev. (p2)";
+
 const char* PARTICLE_NAMES[7]{"pion+",   "pion-",   "kaon+", "kaon-",
                               "proton+", "proton-", "K*"};
+
+// Histogram limits for gaussian fits
+const double H_LOW = 0.7;
+const double H_HIGH = 1.1;
 
 // Define fit functions
 Double_t gauss(Double_t* xx, Double_t* par) {
@@ -156,7 +162,7 @@ void analyse(const char* file_name) {
   inv_mass_canvas->cd(1);
 
   // Add first histogram directly from the generation
-  TF1* k_star_fit = new TF1("k_star_fit", gauss, 0.6, 1.2, 3);
+  TF1* k_star_fit = new TF1("k_star_fit", gauss, H_LOW, H_HIGH, 3);
   k_star_fit->SetParameter(0, 500);
   k_star_fit->SetParName(0, HEIGHT_LABEL);
   k_star_fit->SetParameter(1, 0.9);
@@ -164,6 +170,9 @@ void analyse(const char* file_name) {
   k_star_fit->SetParameter(2, 0.05);
   k_star_fit->SetParName(2, STDDEV_LABEL);
   auto invm_decayed_h = histo_array[11];
+  // Rebin in order to have wider bins
+  invm_decayed_h->Rebin(5);
+  invm_decayed_h->SetAxisRange(H_LOW, H_HIGH);
   invm_decayed_h->SetTitle("Decay products");
   invm_decayed_h->SetXTitle("Invariant mass (GeV)");
   invm_decayed_h->SetYTitle("Occurrences");
@@ -172,7 +181,9 @@ void analyse(const char* file_name) {
   // Create second histogram. Find the signal by subtracting same charge
   // particles from opposite charge particles
   auto invm_opposite_charge_h = histo_array[7];
+  invm_opposite_charge_h->Rebin(10);
   auto invm_same_charge_h = histo_array[8];
+  invm_same_charge_h->Rebin(10);
   TH1F* invm_subtraction_all = new TH1F(*(TH1F*)invm_opposite_charge_h);
   invm_subtraction_all->SetTitle("Opposite charge - same charge");
   invm_subtraction_all->SetName("invm_subtraction_all");
@@ -180,9 +191,9 @@ void analyse(const char* file_name) {
   invm_subtraction_all->SetYTitle("Occurrences");
   invm_subtraction_all->Add(invm_opposite_charge_h, invm_same_charge_h, 1, -1);
   invm_subtraction_all->SetEntries(invm_opposite_charge_h->GetEntries());
-  invm_subtraction_all->SetAxisRange(0.6, 1.2);
+  invm_subtraction_all->SetAxisRange(H_LOW, H_HIGH);
 
-  TF1* invm_all_fit = new TF1("invm_all_fit", gauss, 0., 7., 3);
+  TF1* invm_all_fit = new TF1("invm_all_fit", gauss, H_LOW, H_HIGH, 3);
   invm_all_fit->SetParameter(0, 7.996);
   invm_all_fit->SetParName(0, HEIGHT_LABEL);
   invm_all_fit->SetParameter(1, 0.8919);
@@ -213,7 +224,9 @@ void analyse(const char* file_name) {
   // Create the third histogram. Find the signal by subtracting kaon & pion with
   // same charge from kaon & pion with opposite charge
   auto invm_pion_kaon_opposite_h = histo_array[9];
+  invm_pion_kaon_opposite_h->Rebin(10);
   auto invm_pion_kaon_same_h = histo_array[10];
+  invm_pion_kaon_same_h->Rebin(10);
   TH1F* invm_subtraction_pion_kaon =
       new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
   invm_subtraction_pion_kaon->SetTitle(
@@ -225,9 +238,10 @@ void analyse(const char* file_name) {
                                   invm_pion_kaon_same_h, 1, -1);
   invm_subtraction_pion_kaon->SetEntries(
       invm_pion_kaon_opposite_h->GetEntries());
-  invm_subtraction_pion_kaon->SetAxisRange(0.6, 1.2);
+  invm_subtraction_pion_kaon->SetAxisRange(H_LOW, H_HIGH);
 
-  TF1* invm_pion_kaon_fit = new TF1("invm_pion_kaon_fit", gauss, 0., 7., 3);
+  TF1* invm_pion_kaon_fit =
+      new TF1("invm_pion_kaon_fit", gauss, H_LOW, H_HIGH, 3);
   invm_pion_kaon_fit->SetParameter(0, 7.996);
   invm_pion_kaon_fit->SetParName(0, HEIGHT_LABEL);
   invm_pion_kaon_fit->SetParameter(1, 0.8919);
