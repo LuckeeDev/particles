@@ -78,9 +78,8 @@ void analyse(const char* file_name) {
   for (int i{}; i < 7; ++i) {
     auto occurrences = particle_types_histogram->GetBinContent(i + 1);
 
-    std::cout << "Particle " << PARTICLE_NAMES[i] << ": " << occurrences << " ("
-              << occurrences / particle_types_histogram->GetEntries() * 100
-              << "%)" << '\n';
+    std::cout << "Particle " << PARTICLE_NAMES[i] << ": " << occurrences
+              << " +- " << std::sqrt(occurrences) << '\n';
   }
 
   // Create first canvas, with particle types, angles and momentum
@@ -110,7 +109,7 @@ void analyse(const char* file_name) {
   azimutal_angles_histogram->Fit(azimutal_fit, "Q");
 
   std::cout << "\nAZIMUTAL FIT" << '\n'
-            << HEIGHT_LABEL << ": " << azimutal_fit->GetParameter(0) << "+-"
+            << HEIGHT_LABEL << ": " << azimutal_fit->GetParameter(0) << " +- "
             << azimutal_fit->GetParError(0) << '\n'
             << "Chi square/NDF: "
             << azimutal_fit->GetChisquare() / azimutal_fit->GetNDF() << '\n'
@@ -128,7 +127,7 @@ void analyse(const char* file_name) {
   polar_angles_histogram->Fit(polar_fit, "Q");
 
   std::cout << "\nPOLAR FIT" << '\n'
-            << HEIGHT_LABEL << ": " << polar_fit->GetParameter(0) << "+-"
+            << HEIGHT_LABEL << ": " << polar_fit->GetParameter(0) << " +- "
             << polar_fit->GetParError(0) << '\n'
             << "Chi square/NDF: "
             << polar_fit->GetChisquare() / polar_fit->GetNDF() << '\n'
@@ -148,9 +147,9 @@ void analyse(const char* file_name) {
   momentum_histogram->Fit(momentum_fit, "Q");
 
   std::cout << "\nMOMENTUM FIT" << '\n'
-            << HEIGHT_LABEL << ": " << momentum_fit->GetParameter(0) << "+-"
+            << HEIGHT_LABEL << ": " << momentum_fit->GetParameter(0) << " +- "
             << momentum_fit->GetParError(0) << '\n'
-            << MEAN_LABEL << ": " << momentum_fit->GetParameter(1) << "+-"
+            << MEAN_LABEL << ": " << momentum_fit->GetParameter(1) << " +- "
             << momentum_fit->GetParError(1) << '\n'
             << "Chi square/NDF: "
             << momentum_fit->GetChisquare() / momentum_fit->GetNDF() << '\n'
@@ -207,18 +206,18 @@ void analyse(const char* file_name) {
   std::cout << "\nINVARIANT MASS BETWEEN ALL PARTICLES (OPPOSITE CHARGE - SAME "
                "CHARGE) FIT"
             << '\n'
-            << HEIGHT_LABEL << ": " << invm_all_fit->GetParameter(0) << "+-"
+            << HEIGHT_LABEL << ": " << invm_all_fit->GetParameter(0) << " +- "
             << invm_all_fit->GetParError(0) << '\n'
-            << MEAN_LABEL << ": " << invm_all_fit->GetParameter(1) << "+-"
+            << MEAN_LABEL << ": " << invm_all_fit->GetParameter(1) << " +- "
             << invm_all_fit->GetParError(1) << '\n'
-            << STDDEV_LABEL << ": " << invm_all_fit->GetParameter(2) << "+-"
+            << STDDEV_LABEL << ": " << invm_all_fit->GetParameter(2) << " +- "
             << invm_all_fit->GetParError(2) << '\n'
             << "Chi square/NDF: "
             << invm_all_fit->GetChisquare() / invm_all_fit->GetNDF() << '\n'
             << "Probability: " << invm_all_fit->GetProb() << '\n'
-            << "K* mass: " << invm_all_fit->GetParameter(1) << "+-"
+            << "K* mass: " << invm_all_fit->GetParameter(1) << " +- "
             << invm_all_fit->GetParError(1) << '\n'
-            << "K* width: " << invm_all_fit->GetParameter(2) << "+-"
+            << "K* width: " << invm_all_fit->GetParameter(2) << " +- "
             << invm_all_fit->GetParError(2) << '\n';
 
   // Create the third histogram. Find the signal by subtracting kaon & pion with
@@ -256,17 +255,17 @@ void analyse(const char* file_name) {
                "CHARGE) FIT"
             << '\n'
             << HEIGHT_LABEL << ": " << invm_pion_kaon_fit->GetParameter(0)
-            << "+-" << invm_pion_kaon_fit->GetParError(0) << '\n'
-            << MEAN_LABEL << ": " << invm_pion_kaon_fit->GetParameter(1) << "+-"
-            << invm_pion_kaon_fit->GetParError(1) << '\n'
+            << " +- " << invm_pion_kaon_fit->GetParError(0) << '\n'
+            << MEAN_LABEL << ": " << invm_pion_kaon_fit->GetParameter(1)
+            << " +- " << invm_pion_kaon_fit->GetParError(1) << '\n'
             << STDDEV_LABEL << ": " << invm_pion_kaon_fit->GetParameter(2)
-            << "+-" << invm_pion_kaon_fit->GetParError(2) << '\n'
+            << " +- " << invm_pion_kaon_fit->GetParError(2) << '\n'
             << "Chi square/NDF: "
             << invm_pion_kaon_fit->GetChisquare() / invm_pion_kaon_fit->GetNDF()
             << '\n'
             << "Probability: " << invm_pion_kaon_fit->GetProb() << '\n'
-            << "K* mass: " << invm_pion_kaon_fit->GetParameter(1) << "+-"
+            << "K* mass: " << invm_pion_kaon_fit->GetParameter(1) << " +- "
             << invm_pion_kaon_fit->GetParError(1) << '\n'
-            << "K* width: " << invm_pion_kaon_fit->GetParameter(2) << "+-"
+            << "K* width: " << invm_pion_kaon_fit->GetParameter(2) << " +- "
             << invm_pion_kaon_fit->GetParError(2) << '\n';
 }
