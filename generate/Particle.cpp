@@ -28,6 +28,8 @@ PolarVector Momentum::getPolar() const {
   double theta = std::acos(z / r);
   double phi = std::atan(y / x);
 
+  // convert to the correct phi by adjusting the atan(y / x) result based on
+  // x and y coordinates
   if (phi > 0 && x < 0) {
     phi += TMath::Pi();
   } else if (phi < 0 && x > 0) {

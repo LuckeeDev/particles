@@ -173,6 +173,7 @@ void generate(int n_gen, const char* file_name) {
 
         event_particles[j].decayToBody(decay_product_1, decay_product_2);
 
+        // fill decay products invariant mass histogram
         auto invariant_mass_products =
             decay_product_1.getInvariantMass(decay_product_2);
 
@@ -182,6 +183,7 @@ void generate(int n_gen, const char* file_name) {
         event_particles.push_back(decay_product_2);
       }
 
+      // fill generation histograms
       auto const& new_particle = event_particles[j];
 
       // type
@@ -199,14 +201,14 @@ void generate(int n_gen, const char* file_name) {
       // momentum
       momentum_h->Fill(std::sqrt(momentum * momentum));
 
-      // momentum xy
+      // momentum on xy plane
       momentum_xy_h->Fill(
           std::sqrt(momentum.x * momentum.x + momentum.y * momentum.y));
 
       // energy
       energy_h->Fill(new_particle.getEnergy());
 
-      // Fill invariant mass histograms. This loop improves performance because
+      // fill invariant mass histograms. This loop improves performance because
       // it avoids unnecessary iterations in the loop after completing the event
       // generation
       if (new_particle.getName() != "k*") {
@@ -224,7 +226,8 @@ void generate(int n_gen, const char* file_name) {
       }
     }
 
-    // decayed particles loop
+    // fill invariant mass histograms with combinations including decayed
+    // particles
     auto event_particles_begin = event_particles.begin();
     auto event_particles_end = event_particles.end();
 

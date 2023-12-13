@@ -10,14 +10,13 @@
 #include "TROOT.h"
 #include "TStyle.h"
 
-// Define repeated constants
+const char* PARTICLE_NAMES[7]{"pion+",   "pion-",   "kaon+", "kaon-",
+                              "proton+", "proton-", "K*"};
+
 // Labels for fit parameters
 const char* HEIGHT_LABEL = "Height (p0)";
 const char* MEAN_LABEL = "Mean (p1)";
 const char* STDDEV_LABEL = "Std. dev. (p2)";
-
-const char* PARTICLE_NAMES[7]{"pion+",   "pion-",   "kaon+", "kaon-",
-                              "proton+", "proton-", "K*"};
 
 // Histogram limits for gaussian fits
 const double H_LOW = 0.7;
@@ -72,7 +71,7 @@ void analyse(const char* file_name) {
 
   auto particle_types_histogram = histo_array[0];
 
-  // Print generated percentages
+  // Print generated occurrences
   std::cout << "\nPARTICLE OCCURRENCES" << '\n';
 
   for (int i{}; i < 7; ++i) {
@@ -184,6 +183,7 @@ void analyse(const char* file_name) {
   auto invm_same_charge_h = histo_array[8];
   invm_same_charge_h->Rebin(10);
   TH1F* invm_subtraction_all = new TH1F(*(TH1F*)invm_opposite_charge_h);
+  // Cosmetics
   invm_subtraction_all->SetTitle("Opposite charge - same charge");
   invm_subtraction_all->SetName("invm_subtraction_all");
   invm_subtraction_all->SetXTitle("Invariant mass (GeV)");
@@ -228,6 +228,7 @@ void analyse(const char* file_name) {
   invm_pion_kaon_same_h->Rebin(10);
   TH1F* invm_subtraction_pion_kaon =
       new TH1F(*(TH1F*)invm_pion_kaon_opposite_h);
+  // Cosmetics
   invm_subtraction_pion_kaon->SetTitle(
       "Opposite charge - same charge (kaon & pion)");
   invm_subtraction_pion_kaon->SetName("invm_subtraction_pion_kaon");
